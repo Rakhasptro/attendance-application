@@ -9,7 +9,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import kotlinx.coroutines.flow.collect
 
 @Composable
 fun LoginScreen(
@@ -21,8 +20,14 @@ fun LoginScreen(
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
+    // navigate on uiState success as a robust fallback
     LaunchedEffect(uiState) {
-        Log.d("LoginScreen", "uiState changed: $uiState")
+        if (uiState is LoginUiState.Success) {
+            Log.d("LoginScreen", "uiState is Success, navigating to home")
+            navController.navigate("home") {
+                popUpTo("login") { inclusive = true }
+            }
+        }
     }
 
     // collect navigate events
@@ -85,9 +90,6 @@ fun LoginScreen(
                 TextButton(onClick = { navController.navigate("register") }) {
                     Text(text = "Register a new account")
                 }
-
-                // debug uiState display
-                Text(text = "Debug uiState: $uiState", style = MaterialTheme.typography.bodySmall)
             }
         }
     }
