@@ -1,10 +1,6 @@
-@file:OptIn(kotlinx.serialization.InternalSerializationApi::class)
-
 package com.rakha.hadirapp.data.network.dto
 
-import kotlinx.serialization.Serializable
-
-@Serializable
+// Plain DTO for Retrofit+Gson
 data class UserResponse(
     val id: String = "",
     val email: String = "",

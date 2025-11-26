@@ -1,8 +1,6 @@
 package com.rakha.hadirapp.data.network.dto
 
-import kotlinx.serialization.Serializable
-
-@Serializable
+// Plain Kotlin data class for Retrofit/Gson serialization
 data class LoginRequest(
     val email: String,
     val password: String

@@ -1,10 +1,6 @@
-@file:OptIn(kotlinx.serialization.InternalSerializationApi::class)
-
 package com.rakha.hadirapp.data.network.dto
 
-import kotlinx.serialization.Serializable
-
-@Serializable
+// Plain data class for Retrofit/Gson
 data class RegisterRequest(
     val email: String,
     val password: String,

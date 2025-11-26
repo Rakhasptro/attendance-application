@@ -1,36 +1,40 @@
 package com.rakha.hadirapp.data.network
 
-import io.ktor.client.HttpClient
-import io.ktor.client.engine.okhttp.OkHttp
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.plugins.logging.*
-import io.ktor.serialization.kotlinx.json.json
-import kotlinx.serialization.json.Json
+import com.google.gson.GsonBuilder
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
 object NetworkModule {
-    fun provideHttpClient(): HttpClient = HttpClient(OkHttp) {
-        engine {
-            // configure underlying OkHttpClient timeouts
-            config {
-                // receiver is OkHttpClient.Builder here
-                connectTimeout(15, TimeUnit.SECONDS)
-                readTimeout(30, TimeUnit.SECONDS)
-                writeTimeout(15, TimeUnit.SECONDS)
-                // you can add more OkHttp configuration here if needed
-            }
+    private const val BASE_URL = "http://10.0.2.2:3000/api/"
+
+    fun provideOkHttpClient(): OkHttpClient {
+        val logging = HttpLoggingInterceptor().apply {
+            level = HttpLoggingInterceptor.Level.BODY
         }
 
-        install(ContentNegotiation) {
-            json(Json {
-                ignoreUnknownKeys = true
-                isLenient = true
-            })
-        }
-
-        install(Logging) {
-            logger = Logger.SIMPLE
-            level = LogLevel.BODY
-        }
+        return OkHttpClient.Builder()
+            .connectTimeout(15, TimeUnit.SECONDS)
+            .readTimeout(30, TimeUnit.SECONDS)
+            .writeTimeout(15, TimeUnit.SECONDS)
+            .addInterceptor(logging)
+            .build()
     }
+
+    fun provideRetrofit(client: OkHttpClient): Retrofit {
+        val gson = GsonBuilder()
+            .setLenient()
+            .serializeNulls()
+            .create()
+
+        return Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .client(client)
+            .addConverterFactory(GsonConverterFactory.create(gson))
+            .build()
+    }
+
+    fun provideAuthApi(): AuthApi = provideRetrofit(provideOkHttpClient()).create(AuthApi::class.java)
 }

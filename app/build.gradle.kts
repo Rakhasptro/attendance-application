@@ -2,7 +2,6 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    id("org.jetbrains.kotlin.plugin.serialization") version libs.versions.kotlin.get()
 }
 
 android {
@@ -36,7 +35,6 @@ android {
     }
     kotlinOptions {
         jvmTarget = "11"
-        freeCompilerArgs += listOf("-Xopt-in=kotlinx.serialization.InternalSerializationApi")
     }
     buildFeatures {
         compose = true
@@ -53,16 +51,12 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
 
-    // Ktor client
-    implementation(libs.ktor.client.core)
-    implementation(libs.ktor.client.okhttp)
-    implementation(libs.ktor.client.content.negotiation)
-    implementation(libs.ktor.serialization.kotlinx.json)
-    implementation(libs.ktor.client.logging)
-    implementation(libs.ktor.client.logging.jvm)
+    // Retrofit & OkHttp (replacing Ktor client)
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("com.squareup.okhttp3:okhttp:4.11.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.11.0")
 
-    // kotlinx-serialization
-    implementation(libs.kotlinx.serialization.json)
 
     // Coroutines
     implementation(libs.kotlinx.coroutines.android)

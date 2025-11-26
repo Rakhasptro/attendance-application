@@ -11,7 +11,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.rakha.hadirapp.data.network.NetworkModule
-import com.rakha.hadirapp.data.network.AuthApi
 import com.rakha.hadirapp.data.repository.AuthRepositoryImpl
 import com.rakha.hadirapp.data.store.TokenDataStore
 import com.rakha.hadirapp.ui.home.HomeScreen
@@ -26,8 +25,7 @@ fun AppNavHost(startDestination: String = "login") {
     val context = LocalContext.current
 
     // Provide simple DI here and remember instances to avoid recreation on recomposition
-    val client = remember { NetworkModule.provideHttpClient() }
-    val api = remember { AuthApi(client) }
+    val api = remember { NetworkModule.provideAuthApi() }
     val repo = remember { AuthRepositoryImpl(api) }
     val store = remember { TokenDataStore(context) }
     val loginViewModel = remember { LoginViewModel(repo, store) }
