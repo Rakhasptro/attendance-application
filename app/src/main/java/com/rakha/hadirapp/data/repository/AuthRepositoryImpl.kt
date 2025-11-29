@@ -4,6 +4,7 @@ import android.util.Log
 import com.rakha.hadirapp.data.network.AuthApi
 import com.rakha.hadirapp.data.network.dto.LoginRequest
 import com.rakha.hadirapp.data.network.dto.RegisterRequest
+import com.rakha.hadirapp.data.network.parseError
 import retrofit2.HttpException
 import java.io.IOException
 
@@ -27,16 +28,11 @@ class AuthRepositoryImpl(private val api: AuthApi) : AuthRepository {
             throw AuthException(message)
         } catch (e: HttpException) {
             Log.d("AuthRepositoryImpl", "HttpException: ${e.message}")
-            val errBody = try {
-                e.response()?.errorBody()?.string()
-            } catch (ex: Exception) {
-                null
-            }
-            val msg = errBody ?: e.message ?: "HTTP error"
+            val msg = e.parseError()
             throw AuthException(msg)
         } catch (e: IOException) {
             Log.d("AuthRepositoryImpl", "IOException: ${e.message}")
-            throw AuthException("Network error: ${e.message}")
+            throw AuthException("Gagal terhubung ke server")
         } catch (e: Exception) {
             Log.d("AuthRepositoryImpl", "Exception: ${e.message}")
             throw AuthException(e.message ?: "Unknown error")
@@ -61,10 +57,10 @@ class AuthRepositoryImpl(private val api: AuthApi) : AuthRepository {
             val message = response.message?.ifBlank { "Registration failed" } ?: "Registration failed"
             throw AuthException(message)
         } catch (e: HttpException) {
-            val errBody = try { e.response()?.errorBody()?.string() } catch (ex: Exception) { null }
-            throw AuthException(errBody ?: e.message ?: "HTTP error")
+            val msg = e.parseError()
+            throw AuthException(msg)
         } catch (e: IOException) {
-            throw AuthException("Network error: ${e.message}")
+            throw AuthException("Gagal terhubung ke server")
         } catch (e: Exception) {
             throw AuthException(e.message ?: "Unknown error")
         }

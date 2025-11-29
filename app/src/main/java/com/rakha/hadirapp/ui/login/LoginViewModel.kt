@@ -28,11 +28,15 @@ class LoginViewModel(
     fun login(email: String, password: String) {
         // validation
         if (email.isBlank()) {
-            _uiState.value = LoginUiState.Error("Email tidak boleh kosong")
+            _uiState.value = LoginUiState.Error.EmptyEmail()
+            return
+        }
+        if (!isValidEmail(email)) {
+            _uiState.value = LoginUiState.Error.InvalidEmail()
             return
         }
         if (password.isBlank()) {
-            _uiState.value = LoginUiState.Error("Password tidak boleh kosong")
+            _uiState.value = LoginUiState.Error.EmptyPassword()
             return
         }
 
@@ -55,12 +59,22 @@ class LoginViewModel(
                     _uiState.value = LoginUiState.Success("")
                     _navigateToHome.emit(Unit)
                 } else {
-                    _uiState.value = LoginUiState.Error(msg)
+                    val errorState = when {
+                        msg.contains("invalid", ignoreCase = true) || msg.contains("salah", ignoreCase = true) -> LoginUiState.Error.WrongPassword(msg)
+                        msg.contains("not found", ignoreCase = true) || msg.contains("not registered", ignoreCase = true) -> LoginUiState.Error.AccountNotFound(msg)
+                        msg.contains("terhubung", ignoreCase = true) -> LoginUiState.Error.NetworkError(msg)
+                        else -> LoginUiState.Error.ServerError(msg)
+                    }
+                    _uiState.value = errorState
                 }
             } catch (e: Exception) {
                 Log.d("LoginViewModel", "exception: ${e.message}")
-                _uiState.value = LoginUiState.Error(e.message ?: "Network error")
+                _uiState.value = LoginUiState.Error.NetworkError("Gagal terhubung ke server")
             }
         }
+    }
+
+    private fun isValidEmail(email: String): Boolean {
+        return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
     }
 }
