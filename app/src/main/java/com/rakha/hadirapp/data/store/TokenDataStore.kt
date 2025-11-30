@@ -20,6 +20,8 @@ class TokenDataStore(private val context: Context) {
         context.dataStore.edit { prefs ->
             prefs[TOKEN_KEY] = token
         }
+        // update in-memory holder for synchronous access by interceptor
+        TokenHolder.setToken(token)
     }
 
     fun getTokenFlow(): Flow<String?> = context.dataStore.data.map { prefs ->
@@ -30,6 +32,15 @@ class TokenDataStore(private val context: Context) {
         context.dataStore.edit { prefs ->
             prefs.remove(TOKEN_KEY)
         }
+        TokenHolder.setToken(null)
     }
 }
 
+object TokenHolder {
+    var token: String? = null
+        private set
+
+    fun setToken(newToken: String?) {
+        token = newToken
+    }
+}

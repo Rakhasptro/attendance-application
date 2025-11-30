@@ -53,20 +53,14 @@ class LoginViewModel(
             } catch (e: AuthException) {
                 Log.d("LoginViewModel", "auth exception: ${e.message}")
                 val msg = e.message ?: "Login failed"
-                // If backend returned a success-like message despite throwing, treat as success
-                if (msg.contains("success", ignoreCase = true)) {
-                    Log.d("LoginViewModel", "AuthException message contains 'success' - treating as success and navigating")
-                    _uiState.value = LoginUiState.Success("")
-                    _navigateToHome.emit(Unit)
-                } else {
-                    val errorState = when {
-                        msg.contains("invalid", ignoreCase = true) || msg.contains("salah", ignoreCase = true) -> LoginUiState.Error.WrongPassword(msg)
-                        msg.contains("not found", ignoreCase = true) || msg.contains("not registered", ignoreCase = true) -> LoginUiState.Error.AccountNotFound(msg)
-                        msg.contains("terhubung", ignoreCase = true) -> LoginUiState.Error.NetworkError(msg)
-                        else -> LoginUiState.Error.ServerError(msg)
-                    }
-                    _uiState.value = errorState
+                // Do NOT treat ambiguous success-like messages as successful login when no token is returned.
+                val errorState = when {
+                    msg.contains("invalid", ignoreCase = true) || msg.contains("salah", ignoreCase = true) -> LoginUiState.Error.WrongPassword(msg)
+                    msg.contains("not found", ignoreCase = true) || msg.contains("not registered", ignoreCase = true) -> LoginUiState.Error.AccountNotFound(msg)
+                    msg.contains("terhubung", ignoreCase = true) -> LoginUiState.Error.NetworkError(msg)
+                    else -> LoginUiState.Error.ServerError(msg)
                 }
+                _uiState.value = errorState
             } catch (e: Exception) {
                 Log.d("LoginViewModel", "exception: ${e.message}")
                 _uiState.value = LoginUiState.Error.NetworkError("Gagal terhubung ke server")

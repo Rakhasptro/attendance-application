@@ -12,12 +12,15 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.rakha.hadirapp.data.network.NetworkModule
 import com.rakha.hadirapp.data.repository.AuthRepositoryImpl
+import com.rakha.hadirapp.data.repository.ProfileRepositoryImpl
 import com.rakha.hadirapp.data.store.TokenDataStore
 import com.rakha.hadirapp.ui.home.HomeScreen
 import com.rakha.hadirapp.ui.login.LoginScreen
 import com.rakha.hadirapp.ui.login.LoginViewModel
 import com.rakha.hadirapp.ui.register.RegisterScreen
 import com.rakha.hadirapp.ui.register.RegisterViewModel
+import com.rakha.hadirapp.ui.profile.ProfileScreen
+import com.rakha.hadirapp.ui.profile.ProfileViewModel
 
 @Composable
 fun AppNavHost(startDestination: String = "login") {
@@ -31,11 +34,18 @@ fun AppNavHost(startDestination: String = "login") {
     val loginViewModel = remember { LoginViewModel(repo, store) }
     val registerViewModel = remember { RegisterViewModel(repo, store) }
 
+    // Profile dependencies
+    val profileApi = remember { NetworkModule.provideRetrofit(NetworkModule.provideOkHttpClient()).create(com.rakha.hadirapp.data.network.ProfileApi::class.java) }
+    val profileRepo = remember { ProfileRepositoryImpl(profileApi) }
+    val profileViewModel = remember { ProfileViewModel(profileRepo, store) }
+
     // observe token and auto-navigate if present
     val token by store.getTokenFlow().collectAsState(initial = null)
 
     LaunchedEffect(token) {
         Log.d("AppNavHost", "observed token change: $token")
+        // update in-memory token holder for interceptor
+        com.rakha.hadirapp.data.store.TokenHolder.setToken(token)
         if (!token.isNullOrBlank()) {
             Log.d("AppNavHost", "navigating to home because token present")
             navController.navigate("home") {
@@ -52,7 +62,10 @@ fun AppNavHost(startDestination: String = "login") {
             RegisterScreen(navController = navController, viewModel = registerViewModel)
         }
         composable("home") {
-            HomeScreen()
+            HomeScreen(navController = navController)
+        }
+        composable("profile") {
+            ProfileScreen(navController = navController, viewModel = profileViewModel)
         }
     }
 }
