@@ -18,6 +18,10 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // BuildConfig field for BASE_URL read from project properties
+        // Use by referencing BuildConfig.BASE_URL in code
+        buildConfigField("String", "BASE_URL", "\"${property("BASE_URL")}\"")
     }
 
     buildTypes {
@@ -38,6 +42,8 @@ android {
     }
     buildFeatures {
         compose = true
+        // Enable BuildConfig generation so buildConfigField() works
+        buildConfig = true
     }
 }
 
