@@ -4,6 +4,8 @@
 
     <!-- Allow the app to use network sockets -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Needed for CameraX runtime permission requests -->
+    <uses-permission android:name="android.permission.CAMERA" />
 
     <application
         android:allowBackup="true"

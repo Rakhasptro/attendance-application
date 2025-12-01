@@ -21,6 +21,11 @@ import com.rakha.hadirapp.ui.register.RegisterScreen
 import com.rakha.hadirapp.ui.register.RegisterViewModel
 import com.rakha.hadirapp.ui.profile.ProfileScreen
 import com.rakha.hadirapp.ui.profile.ProfileViewModel
+import com.rakha.hadirapp.ui.attendance.ScanQrScreen
+import com.rakha.hadirapp.ui.attendance.SelfieCaptureScreen
+import com.rakha.hadirapp.ui.attendance.AttendanceViewModel
+import com.rakha.hadirapp.data.repository.AttendanceRepositoryImpl
+import com.rakha.hadirapp.data.network.AttendanceApi
 
 @Composable
 fun AppNavHost(startDestination: String = "login") {
@@ -38,6 +43,11 @@ fun AppNavHost(startDestination: String = "login") {
     val profileApi = remember { NetworkModule.provideRetrofit(NetworkModule.provideOkHttpClient()).create(com.rakha.hadirapp.data.network.ProfileApi::class.java) }
     val profileRepo = remember { ProfileRepositoryImpl(profileApi) }
     val profileViewModel = remember { ProfileViewModel(profileRepo, store) }
+
+    // Attendance dependencies
+    val attendanceApi = remember { NetworkModule.provideRetrofit(NetworkModule.provideOkHttpClient()).create(AttendanceApi::class.java) }
+    val attendanceRepo = remember { AttendanceRepositoryImpl(attendanceApi) }
+    val attendanceViewModel = remember { AttendanceViewModel(attendanceRepo) }
 
     // observe token and auto-navigate if present
     val token by store.getTokenFlow().collectAsState(initial = null)
@@ -66,6 +76,17 @@ fun AppNavHost(startDestination: String = "login") {
         }
         composable("profile") {
             ProfileScreen(navController = navController, viewModel = profileViewModel)
+        }
+        composable("scan_qr") {
+            ScanQrScreen(navController = navController)
+        }
+        composable("selfie_capture/{sessionId}") { backStackEntry ->
+            val sessionId = backStackEntry.arguments?.getString("sessionId") ?: ""
+            // fetch current profile from profileViewModel
+            val profile = profileViewModel.profileData.collectAsState().value
+            val studentId = profile?.npm ?: ""
+            val name = profile?.fullName ?: profileViewModel.email.collectAsState().value ?: ""
+            SelfieCaptureScreen(navController = navController, sessionId = sessionId, attendanceViewModel = attendanceViewModel, studentId = studentId, name = name)
         }
     }
 }

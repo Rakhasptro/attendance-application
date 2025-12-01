@@ -17,6 +17,9 @@ fun HomeScreen(navController: NavController) {
             Button(onClick = { navController.navigate("profile") }) {
                 Text(text = "Profile")
             }
+            Button(onClick = { navController.navigate("scan_qr") }) {
+                Text(text = "Scan QR & Absensi")
+            }
         }
     }
 }
