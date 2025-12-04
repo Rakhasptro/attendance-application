@@ -22,7 +22,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
@@ -151,6 +151,10 @@ private fun CameraPreviewForScanner(lifecycleOwner: androidx.lifecycle.Lifecycle
     val previewView = remember { PreviewView(context) }
     val cameraExecutor: ExecutorService = remember { Executors.newSingleThreadExecutor() }
 
+    // Debounce mechanism to prevent multiple scans
+    var lastScanTime by remember { mutableStateOf(0L) }
+    val debounceDelay = 2000L // 2 seconds
+
     AndroidView(factory = { ctx ->
         val cameraProviderFuture = ProcessCameraProvider.getInstance(ctx)
         cameraProviderFuture.addListener({
@@ -178,7 +182,15 @@ private fun CameraPreviewForScanner(lifecycleOwner: androidx.lifecycle.Lifecycle
                             for (barcode in barcodes) {
                                 val raw = barcode.rawValue
                                 if (!raw.isNullOrEmpty()) {
-                                    onQrDetected(raw)
+                                    // Apply debounce
+                                    val now = System.currentTimeMillis()
+                                    if (now - lastScanTime > debounceDelay) {
+                                        lastScanTime = now
+                                        Log.d("ScanQr", "QR code detected: $raw")
+                                        onQrDetected(raw)
+                                    } else {
+                                        Log.d("ScanQr", "QR scan debounced, ignoring")
+                                    }
                                     break
                                 }
                             }

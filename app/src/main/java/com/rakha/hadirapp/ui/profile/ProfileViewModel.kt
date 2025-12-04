@@ -8,6 +8,7 @@ import com.rakha.hadirapp.data.repository.ProfileRepository
 import com.rakha.hadirapp.data.repository.ProfileException
 import com.rakha.hadirapp.data.network.dto.Profile
 import com.rakha.hadirapp.data.store.TokenDataStore
+import com.rakha.hadirapp.data.store.TokenHolder
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -40,15 +41,23 @@ class ProfileViewModel(
         viewModelScope.launch {
             _uiState.value = ProfileUiState.Loading
 
-            // Wait for token to be available to avoid 401 due to race conditions
-            val tokenAvailable = withTimeoutOrNull(5000) {
-                tokenDataStore.getTokenFlow().first { !it.isNullOrBlank() }
-            }
+            // Wait for token to be available - check both TokenHolder and DataStore
+            val tokenFromHolder = TokenHolder.token
+            if (!tokenFromHolder.isNullOrBlank()) {
+                Log.d("ProfileViewModel", "Token available from holder immediately")
+            } else {
+                Log.d("ProfileViewModel", "Token not in holder, waiting for DataStore...")
+                val tokenAvailable = withTimeoutOrNull(5000) {
+                    tokenDataStore.getTokenFlow().first { !it.isNullOrBlank() }
+                }
 
-            if (tokenAvailable.isNullOrBlank()) {
-                // No token available within timeout
-                _uiState.value = ProfileUiState.Error.NetworkError("Tidak terautentikasi")
-                return@launch
+                if (tokenAvailable.isNullOrBlank()) {
+                    Log.e("ProfileViewModel", "No token available within timeout")
+                    _uiState.value = ProfileUiState.Error.NetworkError("Tidak terautentikasi. Silakan login kembali.")
+                    return@launch
+                }
+                // Update holder if it was loaded from DataStore
+                TokenHolder.setToken(tokenAvailable)
             }
 
             try {
@@ -57,6 +66,7 @@ class ProfileViewModel(
                 _profileData.value = profile
                 _email.value = resp.user?.email
                 _uiState.value = ProfileUiState.Idle
+                Log.d("ProfileViewModel", "Profile loaded: ${profile?.fullName}")
             } catch (e: ProfileException) {
                 Log.d("ProfileViewModel", "profile error: ${e.message}")
                 _uiState.value = ProfileUiState.Error.NetworkError(e.message ?: "Error")

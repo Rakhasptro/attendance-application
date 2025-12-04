@@ -17,11 +17,13 @@ class TokenDataStore(private val context: Context) {
     private val TOKEN_KEY = stringPreferencesKey("jwt_token")
 
     suspend fun saveToken(token: String) {
+        // CRITICAL FIX: Set in-memory holder FIRST before async DataStore persist
+        // This ensures AuthInterceptor can access token immediately
+        TokenHolder.setToken(token)
+
         context.dataStore.edit { prefs ->
             prefs[TOKEN_KEY] = token
         }
-        // update in-memory holder for synchronous access by interceptor
-        TokenHolder.setToken(token)
     }
 
     fun getTokenFlow(): Flow<String?> = context.dataStore.data.map { prefs ->

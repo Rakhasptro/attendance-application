@@ -14,17 +14,14 @@ class AuthRepositoryImpl(private val api: AuthApi) : AuthRepository {
             val request = LoginRequest(email = email, password = password)
             val response = api.login(request)
             val token = response.token
-            Log.d("AuthRepositoryImpl", "login response: status=${response.status}, message=${response.message}, token=$token")
+            Log.d("AuthRepositoryImpl", "login response: message=${response.message}, token=${if (token.isNullOrBlank()) "null" else "present"}")
 
             if (!token.isNullOrBlank()) {
                 return token
             }
 
-            if (response.status) {
-                throw AuthException("Login succeeded but server did not return an authentication token")
-            }
-
-            val message = response.message?.ifBlank { "Invalid email or password" } ?: "Invalid email or password"
+            // If token is null/blank, something went wrong
+            val message = response.message?.ifBlank { "Server tidak mengembalikan token" } ?: "Server tidak mengembalikan token"
             throw AuthException(message)
         } catch (e: HttpException) {
             Log.d("AuthRepositoryImpl", "HttpException: ${e.message}")
@@ -34,6 +31,7 @@ class AuthRepositoryImpl(private val api: AuthApi) : AuthRepository {
             Log.d("AuthRepositoryImpl", "IOException: ${e.message}")
             throw AuthException("Gagal terhubung ke server")
         } catch (e: Exception) {
+            if (e is AuthException) throw e
             Log.d("AuthRepositoryImpl", "Exception: ${e.message}")
             throw AuthException(e.message ?: "Unknown error")
         }
@@ -44,16 +42,13 @@ class AuthRepositoryImpl(private val api: AuthApi) : AuthRepository {
             val request = RegisterRequest(email = email, password = password)
             val response = api.register(request)
             val token = response.token
-            Log.d("AuthRepositoryImpl", "register response: status=${response.status}, message=${response.message}, token=$token")
+            Log.d("AuthRepositoryImpl", "register response: message=${response.message}, token=${if (token.isNullOrBlank()) "null" else "present"}")
 
             if (!token.isNullOrBlank()) {
                 return token
             }
 
-            if (response.status) {
-                throw AuthException("Registration succeeded but server did not return an authentication token")
-            }
-
+            // If token is null/blank, something went wrong
             val message = response.message?.ifBlank { "Registration failed" } ?: "Registration failed"
             throw AuthException(message)
         } catch (e: HttpException) {
@@ -62,6 +57,7 @@ class AuthRepositoryImpl(private val api: AuthApi) : AuthRepository {
         } catch (e: IOException) {
             throw AuthException("Gagal terhubung ke server")
         } catch (e: Exception) {
+            if (e is AuthException) throw e
             throw AuthException(e.message ?: "Unknown error")
         }
     }

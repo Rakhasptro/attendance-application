@@ -72,7 +72,7 @@ fun AppNavHost(startDestination: String = "login") {
             RegisterScreen(navController = navController, viewModel = registerViewModel)
         }
         composable("home") {
-            HomeScreen(navController = navController)
+            HomeScreen(navController = navController, profileViewModel = profileViewModel)
         }
         composable("profile") {
             ProfileScreen(navController = navController, viewModel = profileViewModel)
@@ -82,11 +82,33 @@ fun AppNavHost(startDestination: String = "login") {
         }
         composable("selfie_capture/{sessionId}") { backStackEntry ->
             val sessionId = backStackEntry.arguments?.getString("sessionId") ?: ""
+
+            // Ensure profile is loaded
+            LaunchedEffect(Unit) {
+                val profile = profileViewModel.profileData.value
+                if (profile == null) {
+                    Log.d("NavGraph", "Profile not loaded, loading now...")
+                    profileViewModel.loadProfile()
+                }
+            }
+
             // fetch current profile from profileViewModel
             val profile = profileViewModel.profileData.collectAsState().value
+            val email = profileViewModel.email.collectAsState().value
+
+            // Use NPM as studentId, fullName as name
             val studentId = profile?.npm ?: ""
-            val name = profile?.fullName ?: profileViewModel.email.collectAsState().value ?: ""
-            SelfieCaptureScreen(navController = navController, sessionId = sessionId, attendanceViewModel = attendanceViewModel, studentId = studentId, name = name)
+            val name = profile?.fullName ?: email ?: ""
+
+            Log.d("NavGraph", "SelfieCaptureScreen params: sessionId=$sessionId, studentId=$studentId, name=$name")
+
+            SelfieCaptureScreen(
+                navController = navController,
+                sessionId = sessionId,
+                attendanceViewModel = attendanceViewModel,
+                studentId = studentId,
+                name = name
+            )
         }
     }
 }

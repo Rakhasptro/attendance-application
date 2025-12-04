@@ -17,11 +17,19 @@ class AttendanceViewModel(private val repository: AttendanceRepository) : ViewMo
         viewModelScope.launch {
             _state.value = AttendanceState.Loading
             try {
+                Log.d("AttendanceViewModel", "Submitting attendance with params:")
+                Log.d("AttendanceViewModel", "  sessionId: $sessionId")
+                Log.d("AttendanceViewModel", "  studentId: $studentId")
+                Log.d("AttendanceViewModel", "  name: $name")
+                Log.d("AttendanceViewModel", "  imageSize: ${imageBase64.length} chars")
+
                 val request = AttendanceRequest(sessionId = sessionId, studentId = studentId, name = name, imageBase64 = imageBase64)
                 val response = repository.submitAttendance(request)
+
+                Log.d("AttendanceViewModel", "Attendance submitted successfully: ${response.id}")
                 _state.value = AttendanceState.Success(response)
             } catch (e: Exception) {
-                Log.d("AttendanceViewModel", "attendance error: ${e.message}")
+                Log.e("AttendanceViewModel", "attendance error: ${e.message}", e)
                 _state.value = AttendanceState.Error(e.message ?: "Unknown error")
             }
         }
