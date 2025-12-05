@@ -87,11 +87,11 @@ fun RegisterScreen(
                     enter = fadeIn(tween(800)) + slideInVertically(initialOffsetY = { -40 })
                 ) {
                     Image(
-                        painter = painterResource(id = R.drawable.hadir_logo),
+                        painter = painterResource(id = R.mipmap.logo_transparan),
                         contentDescription = "Logo",
                         modifier = Modifier
-                            .size(120.dp)
-                            .padding(bottom = 24.dp)
+                            .size(300.dp)
+                            .padding(bottom = 15.dp)
                     )
                 }
 
