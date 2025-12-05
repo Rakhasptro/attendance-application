@@ -1,0 +1,40 @@
+feat: Add welcome screen and redesign authentication UI
+
+Implemented new welcome splash screen with animated logo and completely
+redesigned login/register screens to match modern UI/UX standards.
+
+Changes:
+- Added WelcomeScreen with 3-second animated splash using spring and pulse animations
+- Redesigned LoginScreen with cleaner layout, logo, and improved styling
+- Redesigned RegisterScreen to match LoginScreen design consistency
+- Added PrimaryBlue (#0C5AFF) color to theme for brand consistency
+- Updated navigation flow to start from welcome screen
+- Maintained all existing authentication functionality and error handling
+
+Technical Details:
+- Used Jetpack Compose animation API for smooth transitions
+- Spring animation with bouncy effect for logo entrance
+- Infinite pulsing animation for engaging user experience
+- Consistent input field styling across auth screens
+- Loading states integrated within buttons for better UX
+- No new dependencies added, uses existing Compose libraries
+
+UI Improvements:
+- Professional logo placement on all auth screens
+- Modern color scheme with light gray borders and blue accents
+- Improved text labels and call-to-action styling
+- Better spacing and alignment throughout
+- Smooth fade-in animations for all elements
+
+All existing features preserved:
+✓ Email/password authentication flow
+✓ ViewModel and repository layers unchanged
+✓ API integration unchanged
+✓ Token management unchanged
+✓ Error handling unchanged
+✓ State management unchanged
+
+Tested: ✓ Build successful
+        ✓ No breaking changes
+        ✓ UI matches design mockup
+

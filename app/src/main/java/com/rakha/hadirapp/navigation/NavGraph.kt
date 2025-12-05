@@ -26,9 +26,10 @@ import com.rakha.hadirapp.ui.attendance.SelfieCaptureScreen
 import com.rakha.hadirapp.ui.attendance.AttendanceViewModel
 import com.rakha.hadirapp.data.repository.AttendanceRepositoryImpl
 import com.rakha.hadirapp.data.network.AttendanceApi
+import com.rakha.hadirapp.ui.welcome.WelcomeScreen
 
 @Composable
-fun AppNavHost(startDestination: String = "login") {
+fun AppNavHost(startDestination: String = "welcome") {
     val navController = rememberNavController()
     val context = LocalContext.current
 
@@ -65,6 +66,9 @@ fun AppNavHost(startDestination: String = "login") {
     }
 
     NavHost(navController = navController, startDestination = startDestination) {
+        composable("welcome") {
+            WelcomeScreen(navController = navController)
+        }
         composable("login") {
             LoginScreen(navController = navController, viewModel = loginViewModel)
         }

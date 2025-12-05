@@ -2,21 +2,23 @@ package com.rakha.hadirapp.ui.register
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
-import kotlinx.coroutines.delay
+import com.rakha.hadirapp.R
+import com.rakha.hadirapp.ui.theme.PrimaryBlue
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalAnimationApi::class, ExperimentalMaterial3Api::class)
@@ -26,7 +28,6 @@ fun RegisterScreen(
     viewModel: RegisterViewModel
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -44,20 +45,6 @@ fun RegisterScreen(
         label = "fade"
     )
 
-    // Shake animation for password field
-    var shakePassword by remember { mutableStateOf(false) }
-    val shakeOffset by animateFloatAsState(
-        targetValue = if (shakePassword) 10f else 0f,
-        animationSpec = tween(durationMillis = 50, easing = LinearEasing),
-        label = "shake"
-    )
-
-    // Border color for email field
-    val emailBorderColor = when (uiState) {
-        is RegisterUiState.Error.EmailAlreadyUsed -> Color.Red
-        else -> Color(0xFF2563EB)
-    }
-
     // Show snackbar for all errors
     LaunchedEffect(uiState) {
         if (uiState is RegisterUiState.Error) {
@@ -65,11 +52,6 @@ fun RegisterScreen(
             scope.launch {
                 snackbarHostState.showSnackbar(message)
             }
-        }
-        if (uiState is RegisterUiState.Error.PasswordMismatch) {
-            shakePassword = true
-            delay(300)
-            shakePassword = false
         }
     }
 
@@ -89,49 +71,72 @@ fun RegisterScreen(
     ) { inner ->
         Box(modifier = Modifier
             .fillMaxSize()
-            .padding(inner)
-            .padding(horizontal = 22.dp)) {
+            .padding(inner)) {
             Column(
                 modifier = Modifier
-                    .align(Alignment.Center)
-                    .alpha(fadeAlpha)
-                    .animateContentSize(),
-                verticalArrangement = Arrangement.spacedBy(14.dp)
+                    .fillMaxSize()
+                    .padding(horizontal = 32.dp)
+                    .alpha(fadeAlpha),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
             ) {
 
-                // Title Animation
+                // Logo
                 AnimatedVisibility(
                     visible = true,
                     enter = fadeIn(tween(800)) + slideInVertically(initialOffsetY = { -40 })
                 ) {
-                    Text(
-                        text = "Register",
-                        style = MaterialTheme.typography.headlineMedium.copy(
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFF2563EB)
-                        ),
-                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    Image(
+                        painter = painterResource(id = R.drawable.hadir_logo),
+                        contentDescription = "Logo",
+                        modifier = Modifier
+                            .size(120.dp)
+                            .padding(bottom = 24.dp)
                     )
                 }
-                Spacer(Modifier.height(10.dp))
+
+                Spacer(Modifier.height(16.dp))
+
+                // Title
+                AnimatedVisibility(
+                    visible = true,
+                    enter = fadeIn(tween(800, delayMillis = 100)) + slideInVertically(initialOffsetY = { -20 })
+                ) {
+                    Text(
+                        text = "Create your Account",
+                        style = MaterialTheme.typography.headlineSmall.copy(
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 22.sp,
+                            color = Color(0xFF1F2937)
+                        ),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(bottom = 32.dp)
+                    )
+                }
+
+                Spacer(Modifier.height(8.dp))
 
                 // Email
                 AnimatedVisibility(
                     visible = true,
-                    enter = fadeIn(tween(700, delayMillis = 150)) +
+                    enter = fadeIn(tween(700, delayMillis = 200)) +
                             slideInVertically(initialOffsetY = { 20 })
                 ) {
                     OutlinedTextField(
                         value = email,
                         onValueChange = { email = it },
-                        label = { Text("Email") },
+                        label = { Text("Email", color = Color(0xFF6B7280)) },
                         singleLine = true,
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 16.dp),
                         shape = MaterialTheme.shapes.medium,
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = emailBorderColor,
-                            unfocusedBorderColor = emailBorderColor,
-                            cursorColor = Color(0xFF2563EB)
+                            focusedBorderColor = Color(0xFFE5E7EB),
+                            unfocusedBorderColor = Color(0xFFE5E7EB),
+                            cursorColor = PrimaryBlue,
+                            focusedLabelColor = Color(0xFF6B7280),
+                            unfocusedLabelColor = Color(0xFF9CA3AF)
                         )
                     )
                 }
@@ -139,20 +144,25 @@ fun RegisterScreen(
                 // Password
                 AnimatedVisibility(
                     visible = true,
-                    enter = fadeIn(tween(700, delayMillis = 250)) +
+                    enter = fadeIn(tween(700, delayMillis = 300)) +
                             slideInVertically(initialOffsetY = { 20 })
                 ) {
                     OutlinedTextField(
                         value = password,
                         onValueChange = { password = it },
-                        label = { Text("Password") },
+                        label = { Text("Password", color = Color(0xFF6B7280)) },
                         singleLine = true,
                         visualTransformation = PasswordVisualTransformation(),
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 16.dp),
                         shape = MaterialTheme.shapes.medium,
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = Color(0xFF2563EB),
-                            cursorColor = Color(0xFF2563EB)
+                            focusedBorderColor = Color(0xFFE5E7EB),
+                            unfocusedBorderColor = Color(0xFFE5E7EB),
+                            cursorColor = PrimaryBlue,
+                            focusedLabelColor = Color(0xFF6B7280),
+                            unfocusedLabelColor = Color(0xFF9CA3AF)
                         )
                     )
                 }
@@ -160,45 +170,35 @@ fun RegisterScreen(
                 // Confirm Password
                 AnimatedVisibility(
                     visible = true,
-                    enter = fadeIn(tween(700, delayMillis = 350)) +
+                    enter = fadeIn(tween(700, delayMillis = 400)) +
                             slideInVertically(initialOffsetY = { 20 })
                 ) {
                     OutlinedTextField(
                         value = confirmPassword,
                         onValueChange = { confirmPassword = it },
-                        label = { Text("Confirm Password") },
+                        label = { Text("Confirm Password", color = Color(0xFF6B7280)) },
                         singleLine = true,
                         visualTransformation = PasswordVisualTransformation(),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .graphicsLayer {
-                                translationX = shakeOffset
-                            },
+                            .padding(bottom = 24.dp),
                         shape = MaterialTheme.shapes.medium,
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = Color(0xFF2563EB),
-                            cursorColor = Color(0xFF2563EB)
+                            focusedBorderColor = Color(0xFFE5E7EB),
+                            unfocusedBorderColor = Color(0xFFE5E7EB),
+                            cursorColor = PrimaryBlue,
+                            focusedLabelColor = Color(0xFF6B7280),
+                            unfocusedLabelColor = Color(0xFF9CA3AF)
                         )
                     )
                 }
 
-                // Loading
-                AnimatedVisibility(
-                    visible = uiState is RegisterUiState.Loading,
-                    enter = fadeIn(tween(200)),
-                    exit = fadeOut(tween(200)),
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
-                ) {
-                    CircularProgressIndicator(
-                        strokeWidth = 3.dp,
-                        modifier = Modifier.size(26.dp)
-                    )
-                }
+                Spacer(Modifier.height(8.dp))
 
-                // Button Register
+                // Register Button
                 AnimatedVisibility(
                     visible = true,
-                    enter = fadeIn(tween(700, delayMillis = 450)) +
+                    enter = fadeIn(tween(700, delayMillis = 500)) +
                             slideInVertically(initialOffsetY = { 20 })
                 ) {
                     Button(
@@ -209,23 +209,49 @@ fun RegisterScreen(
                         shape = MaterialTheme.shapes.medium,
                         enabled = uiState !is RegisterUiState.Loading,
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF2563EB)
+                            containerColor = PrimaryBlue,
+                            contentColor = Color.White
                         )
                     ) {
-                        Text("Register")
+                        if (uiState is RegisterUiState.Loading) {
+                            CircularProgressIndicator(
+                                color = Color.White,
+                                strokeWidth = 2.dp,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        } else {
+                            Text("Sign up", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+                        }
                     }
                 }
+
+                Spacer(Modifier.height(32.dp))
 
                 // Back to Login
                 AnimatedVisibility(
                     visible = true,
-                    enter = fadeIn(tween(700, delayMillis = 550))
+                    enter = fadeIn(tween(700, delayMillis = 600))
                 ) {
-                    TextButton(onClick = { navController.popBackStack() }) {
+                    Row(
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                         Text(
-                            text = "Back to Login",
-                            color = Color(0xFF2563EB)
+                            text = "Already have an account? ",
+                            color = Color(0xFF6B7280),
+                            fontSize = 14.sp
                         )
+                        TextButton(
+                            onClick = { navController.popBackStack() },
+                            contentPadding = PaddingValues(0.dp)
+                        ) {
+                            Text(
+                                text = "Sign in",
+                                color = PrimaryBlue,
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
                     }
                 }
             }
