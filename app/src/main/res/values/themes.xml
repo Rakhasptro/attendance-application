@@ -2,4 +2,10 @@
 <resources>
 
     <style name="Theme.HadirApp" parent="android:Theme.Material.Light.NoActionBar" />
+
+    <style name="Theme.NoSplashIcon" parent="Theme.HadirApp">
+        <item name="android:windowBackground">@null</item>
+        <item name="android:windowIsTranslucent">true</item>
+    </style>
+
 </resources>
