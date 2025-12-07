@@ -160,24 +160,44 @@ fun LoginScreen(
                     enter = fadeIn(tween(700, delayMillis = 300)) +
                             slideInVertically(initialOffsetY = { 20 })
                 ) {
-                    OutlinedTextField(
-                        value = password,
-                        onValueChange = { password = it },
-                        label = { Text("Password", color = Color(0xFF6B7280)) },
-                        singleLine = true,
-                        visualTransformation = PasswordVisualTransformation(),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 24.dp),
-                        shape = MaterialTheme.shapes.medium,
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = PrimaryBlue ,
-                            unfocusedBorderColor = Color(0xFFE5E7EB),
-                            cursorColor = PrimaryBlue,
-                            focusedLabelColor = PrimaryBlue,
-                            unfocusedLabelColor = Color(0xFF9CA3AF)
+                    Column {
+                        OutlinedTextField(
+                            value = password,
+                            onValueChange = { password = it },
+                            label = { Text("Password", color = Color(0xFF6B7280)) },
+                            singleLine = true,
+                            visualTransformation = PasswordVisualTransformation(),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 8.dp),
+                            shape = MaterialTheme.shapes.medium,
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = PrimaryBlue ,
+                                unfocusedBorderColor = Color(0xFFE5E7EB),
+                                cursorColor = PrimaryBlue,
+                                focusedLabelColor = PrimaryBlue,
+                                unfocusedLabelColor = Color(0xFF9CA3AF)
+                            )
                         )
-                    )
+
+                        // Forgot Password Link
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.End
+                        ) {
+                            TextButton(
+                                onClick = { navController.navigate("forgot_password") },
+                                contentPadding = PaddingValues(0.dp)
+                            ) {
+                                Text(
+                                    text = "Lupa Password?",
+                                    color = PrimaryBlue,
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
+                        }
+                    }
                 }
 
                 Spacer(Modifier.height(8.dp))

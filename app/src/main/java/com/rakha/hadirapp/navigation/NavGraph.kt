@@ -20,6 +20,8 @@ import com.rakha.hadirapp.ui.login.LoginScreen
 import com.rakha.hadirapp.ui.login.LoginViewModel
 import com.rakha.hadirapp.ui.register.RegisterScreen
 import com.rakha.hadirapp.ui.register.RegisterViewModel
+import com.rakha.hadirapp.ui.forgotpassword.ForgotPasswordScreen
+import com.rakha.hadirapp.ui.forgotpassword.ForgotPasswordViewModel
 import com.rakha.hadirapp.ui.profile.ProfileScreen
 import com.rakha.hadirapp.ui.profile.ProfileViewModel
 import com.rakha.hadirapp.ui.attendance.ScanQrScreen
@@ -40,6 +42,7 @@ fun AppNavHost(startDestination: String = "welcome") {
     val store = remember { TokenDataStore(context) }
     val loginViewModel = remember { LoginViewModel(repo, store) }
     val registerViewModel = remember { RegisterViewModel(repo, store) }
+    val forgotPasswordViewModel = remember { ForgotPasswordViewModel(repo) }
 
     // Profile dependencies
     val profileApi = remember { NetworkModule.provideRetrofit(NetworkModule.provideOkHttpClient()).create(com.rakha.hadirapp.data.network.ProfileApi::class.java) }
@@ -78,6 +81,9 @@ fun AppNavHost(startDestination: String = "welcome") {
         }
         composable("register") {
             RegisterScreen(navController = navController, viewModel = registerViewModel)
+        }
+        composable("forgot_password") {
+            ForgotPasswordScreen(navController = navController, viewModel = forgotPasswordViewModel)
         }
         composable("home") {
             HomeScreen(

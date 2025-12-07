@@ -4,6 +4,7 @@ import android.util.Log
 import com.rakha.hadirapp.data.network.AuthApi
 import com.rakha.hadirapp.data.network.dto.LoginRequest
 import com.rakha.hadirapp.data.network.dto.RegisterRequest
+import com.rakha.hadirapp.data.network.dto.ForgotPasswordRequest
 import com.rakha.hadirapp.data.network.parseError
 import retrofit2.HttpException
 import java.io.IOException
@@ -61,6 +62,29 @@ class AuthRepositoryImpl(private val api: AuthApi) : AuthRepository {
             throw AuthException(e.message ?: "Unknown error")
         }
     }
+
+    override suspend fun forgotPassword(npm: String, newPassword: String): String {
+        try {
+            val request = ForgotPasswordRequest(npm = npm, newPassword = newPassword)
+            val response = api.forgotPassword(request)
+            Log.d("AuthRepositoryImpl", "forgotPassword response: message=${response.message}")
+
+            return response.message
+        } catch (e: HttpException) {
+            Log.d("AuthRepositoryImpl", "HttpException: ${e.message}")
+            val msg = e.parseError()
+            throw AuthException(msg)
+        } catch (e: IOException) {
+            Log.d("AuthRepositoryImpl", "IOException: ${e.message}")
+            throw AuthException("Gagal terhubung ke server")
+        } catch (e: Exception) {
+            if (e is AuthException) throw e
+            Log.d("AuthRepositoryImpl", "Exception: ${e.message}")
+            throw AuthException(e.message ?: "Unknown error")
+        }
+    }
 }
 
 class AuthException(message: String) : Exception(message)
+
+
