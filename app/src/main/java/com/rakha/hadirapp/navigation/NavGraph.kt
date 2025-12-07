@@ -15,6 +15,7 @@ import com.rakha.hadirapp.data.repository.AuthRepositoryImpl
 import com.rakha.hadirapp.data.repository.ProfileRepositoryImpl
 import com.rakha.hadirapp.data.store.TokenDataStore
 import com.rakha.hadirapp.ui.home.HomeScreen
+import com.rakha.hadirapp.ui.home.HomeViewModel
 import com.rakha.hadirapp.ui.login.LoginScreen
 import com.rakha.hadirapp.ui.login.LoginViewModel
 import com.rakha.hadirapp.ui.register.RegisterScreen
@@ -50,6 +51,9 @@ fun AppNavHost(startDestination: String = "welcome") {
     val attendanceRepo = remember { AttendanceRepositoryImpl(attendanceApi) }
     val attendanceViewModel = remember { AttendanceViewModel(attendanceRepo) }
 
+    // Home ViewModel
+    val homeViewModel = remember { HomeViewModel(attendanceRepo) }
+
     // observe token and auto-navigate if present
     val token by store.getTokenFlow().collectAsState(initial = null)
 
@@ -76,7 +80,11 @@ fun AppNavHost(startDestination: String = "welcome") {
             RegisterScreen(navController = navController, viewModel = registerViewModel)
         }
         composable("home") {
-            HomeScreen(navController = navController, profileViewModel = profileViewModel)
+            HomeScreen(
+                navController = navController,
+                profileViewModel = profileViewModel,
+                homeViewModel = homeViewModel
+            )
         }
         composable("profile") {
             ProfileScreen(navController = navController, viewModel = profileViewModel)

@@ -45,7 +45,7 @@ fun WelcomeScreen(navController: NavController) {
     // Start animation and navigate after delay
     LaunchedEffect(Unit) {
         animationStarted = true
-        delay(3000) // 3 seconds
+        delay(4000) // 4 seconds
         navController.navigate("login") {
             popUpTo("welcome") { inclusive = true }
         }
