@@ -90,12 +90,10 @@ fun HomeScreen(
                     painter = painterResource(id = R.drawable.ic_profile),
                     contentDescription = "Profile",
                     modifier = Modifier
-                        .size(48.dp)
+                        .size(50.dp)
                         .clip(CircleShape)
-                        .background(Color.Black)
-                        .clickable { navController.navigate("profile") }
-                        .padding(12.dp),
-                    tint = Color.White
+                        .clickable { navController.navigate("profile") },
+                    tint = Color.Black
                 )
             }
 
@@ -266,20 +264,14 @@ fun AttendanceHistoryCard(item: AttendanceHistoryItem, baseUrl: String) {
                 modifier = Modifier.weight(1f)
             ) {
                 Text(
-                    text = item.studentName ?: "Unknown",
+                    text = item.schedule?.courseName ?: "Unknown Course",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.Black
                 )
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(3.dp))
                 Text(
                     text = formatScannedDate(item.scannedAt),
-                    fontSize = 13.sp,
-                    color = Color.Gray
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = "Nama dosen",
                     fontSize = 13.sp,
                     color = Color.Gray
                 )

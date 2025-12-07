@@ -145,11 +145,11 @@ fun LoginScreen(
                             .padding(bottom = 16.dp),
                         shape = MaterialTheme.shapes.medium,
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = Color(0xFFE5E7EB),
+                            focusedBorderColor = PrimaryBlue,
                             unfocusedBorderColor = Color(0xFFE5E7EB),
                             cursorColor = PrimaryBlue,
-                            focusedLabelColor = Color(0xFF6B7280),
-                            unfocusedLabelColor = Color(0xFF9CA3AF)
+                            focusedLabelColor = PrimaryBlue,
+                            unfocusedLabelColor = Color(0xFF6B7280)
                         )
                     )
                 }
@@ -171,10 +171,10 @@ fun LoginScreen(
                             .padding(bottom = 24.dp),
                         shape = MaterialTheme.shapes.medium,
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = Color(0xFFE5E7EB),
+                            focusedBorderColor = PrimaryBlue ,
                             unfocusedBorderColor = Color(0xFFE5E7EB),
                             cursorColor = PrimaryBlue,
-                            focusedLabelColor = Color(0xFF6B7280),
+                            focusedLabelColor = PrimaryBlue,
                             unfocusedLabelColor = Color(0xFF9CA3AF)
                         )
                     )

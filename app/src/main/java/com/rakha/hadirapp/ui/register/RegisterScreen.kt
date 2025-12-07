@@ -132,10 +132,10 @@ fun RegisterScreen(
                             .padding(bottom = 16.dp),
                         shape = MaterialTheme.shapes.medium,
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = Color(0xFFE5E7EB),
+                            focusedBorderColor = PrimaryBlue,
                             unfocusedBorderColor = Color(0xFFE5E7EB),
                             cursorColor = PrimaryBlue,
-                            focusedLabelColor = Color(0xFF6B7280),
+                            focusedLabelColor = PrimaryBlue,
                             unfocusedLabelColor = Color(0xFF9CA3AF)
                         )
                     )
@@ -158,10 +158,10 @@ fun RegisterScreen(
                             .padding(bottom = 16.dp),
                         shape = MaterialTheme.shapes.medium,
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = Color(0xFFE5E7EB),
+                            focusedBorderColor = PrimaryBlue,
                             unfocusedBorderColor = Color(0xFFE5E7EB),
                             cursorColor = PrimaryBlue,
-                            focusedLabelColor = Color(0xFF6B7280),
+                            focusedLabelColor = PrimaryBlue,
                             unfocusedLabelColor = Color(0xFF9CA3AF)
                         )
                     )
@@ -184,10 +184,10 @@ fun RegisterScreen(
                             .padding(bottom = 24.dp),
                         shape = MaterialTheme.shapes.medium,
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = Color(0xFFE5E7EB),
+                            focusedBorderColor = PrimaryBlue,
                             unfocusedBorderColor = Color(0xFFE5E7EB),
                             cursorColor = PrimaryBlue,
-                            focusedLabelColor = Color(0xFF6B7280),
+                            focusedLabelColor = PrimaryBlue,
                             unfocusedLabelColor = Color(0xFF9CA3AF)
                         )
                     )
@@ -246,7 +246,7 @@ fun RegisterScreen(
                             contentPadding = PaddingValues(0.dp)
                         ) {
                             Text(
-                                text = "Sign in",
+                                text = "Login",
                                 color = PrimaryBlue,
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.SemiBold

@@ -15,6 +15,18 @@ data class AttendanceHistoryItem(
     @SerializedName("rejectionReason") val rejectionReason: String?,
     @SerializedName("scannedAt") val scannedAt: String?,
     @SerializedName("createdAt") val createdAt: String?,
-    @SerializedName("updatedAt") val updatedAt: String?
+    @SerializedName("updatedAt") val updatedAt: String?,
+    @SerializedName("schedule") val schedule: Schedule?
+)
+
+data class Schedule(
+    @SerializedName("id") val id: String?,
+    @SerializedName("courseName") val courseName: String?,
+    @SerializedName("courseCode") val courseCode: String?,
+    @SerializedName("date") val date: String?,
+    @SerializedName("startTime") val startTime: String?,
+    @SerializedName("endTime") val endTime: String?,
+    @SerializedName("room") val room: String?,
+    @SerializedName("status") val status: String?
 )
 

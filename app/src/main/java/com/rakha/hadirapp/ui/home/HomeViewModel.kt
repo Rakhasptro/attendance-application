@@ -62,7 +62,8 @@ class HomeViewModel(
             _filteredHistory.value = _allHistory.value
         } else {
             _filteredHistory.value = _allHistory.value.filter { item ->
-                // Filter by schedule name (you might need to add schedule name field)
+                // Filter by course name, student name, or NPM
+                item.schedule?.courseName?.contains(query, ignoreCase = true) == true ||
                 item.studentName?.contains(query, ignoreCase = true) == true ||
                 item.studentNpm?.contains(query, ignoreCase = true) == true
             }
