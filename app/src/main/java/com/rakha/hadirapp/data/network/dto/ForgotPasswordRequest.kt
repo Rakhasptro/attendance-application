@@ -4,7 +4,8 @@ import com.google.gson.annotations.SerializedName
 
 data class ForgotPasswordRequest(
     @SerializedName("npm") val npm: String,
-    @SerializedName("newPassword") val newPassword: String
+    @SerializedName("newPassword") val newPassword: String,
+    @SerializedName("confirmPassword") val confirmPassword: String
 )
 
 data class ForgotPasswordResponse(

@@ -65,7 +65,7 @@ class AuthRepositoryImpl(private val api: AuthApi) : AuthRepository {
 
     override suspend fun forgotPassword(npm: String, newPassword: String): String {
         try {
-            val request = ForgotPasswordRequest(npm = npm, newPassword = newPassword)
+            val request = ForgotPasswordRequest(npm = npm, newPassword = newPassword, confirmPassword = newPassword)
             val response = api.forgotPassword(request)
             Log.d("AuthRepositoryImpl", "forgotPassword response: message=${response.message}")
 

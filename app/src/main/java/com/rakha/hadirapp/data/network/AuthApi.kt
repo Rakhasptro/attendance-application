@@ -19,6 +19,6 @@ interface AuthApi {
     suspend fun register(@Body request: RegisterRequest): LoginResponse
 
     @Headers("Content-Type: application/json")
-    @POST("auth/forgot-password")
+    @POST("auth/reset-password")
     suspend fun forgotPassword(@Body request: ForgotPasswordRequest): ForgotPasswordResponse
 }
