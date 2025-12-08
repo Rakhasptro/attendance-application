@@ -8,29 +8,33 @@ import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavController
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import java.io.ByteArrayOutputStream
 import androidx.core.content.ContextCompat
+import java.io.ByteArrayOutputStream
 import java.io.File
-import java.io.FileInputStream
+
 
 @Composable
 fun SelfieCaptureScreen(navController: NavController, sessionId: String, attendanceViewModel: AttendanceViewModel, studentId: String, name: String) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     var isCapturing by remember { mutableStateOf(false) }
+
+    val primaryBlue = Color(0xFF0C5AFF)
 
     // hold ImageCapture instance in remember so button can trigger it
     val imageCapture = remember { ImageCapture.Builder().setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY).build() }
@@ -67,7 +71,11 @@ fun SelfieCaptureScreen(navController: NavController, sessionId: String, attenda
                     style = androidx.compose.material3.MaterialTheme.typography.bodyMedium
                 )
                 Spacer(modifier = Modifier.height(24.dp))
-                Button(onClick = { navController.navigate("profile") }) {
+                Button(
+                    onClick = { navController.navigate("profile") },
+                    colors = ButtonDefaults.buttonColors(containerColor = primaryBlue),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
                     Text("Ke Halaman Profile")
                 }
             }
@@ -78,51 +86,70 @@ fun SelfieCaptureScreen(navController: NavController, sessionId: String, attenda
             CameraPreviewForCapture(lifecycleOwner = lifecycleOwner, imageCapture = imageCapture)
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
         if (isCapturing) {
-            CircularProgressIndicator()
-            Text("Mengirim...")
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.padding(bottom = 32.dp)
+            ) {
+                CircularProgressIndicator(color = primaryBlue)
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    "Mengirim...",
+                    color = primaryBlue
+                )
+            }
         } else {
-            Button(onClick = {
-                isCapturing = true
-                // capture to temporary file
-                val photoFile = File(context.cacheDir, "selfie_${System.currentTimeMillis()}.jpg")
-                val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
+            Button(
+                onClick = {
+                    isCapturing = true
+                    // capture to temporary file
+                    val photoFile = File(context.cacheDir, "selfie_${System.currentTimeMillis()}.jpg")
+                    val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
 
-                imageCapture.takePicture(outputOptions, ContextCompat.getMainExecutor(context), object : ImageCapture.OnImageSavedCallback {
-                    override fun onError(exc: ImageCaptureException) {
-                        Log.e("SelfieCapture", "Photo capture failed: ${exc.message}")
-                        isCapturing = false
-                        attendanceViewModel.reset()
-                    }
-
-                    override fun onImageSaved(output: ImageCapture.OutputFileResults) {
-                        // convert file to base64 with compression and submit
-                        try {
-                            // Read file to bitmap for compression
-                            val bitmap = BitmapFactory.decodeFile(photoFile.absolutePath)
-
-                            // Compress bitmap and convert to base64
-                            val compressed = compressBitmap(bitmap, maxSize = 1024)
-                            val out = ByteArrayOutputStream()
-                            compressed.compress(Bitmap.CompressFormat.JPEG, 70, out)
-                            val bytes = out.toByteArray()
-                            val base64 = "data:image/jpeg;base64," + Base64.encodeToString(bytes, Base64.NO_WRAP)
-
-                            Log.d("SelfieCapture", "Image compressed and encoded, size: ${bytes.size} bytes")
-
-                            // call viewmodel to submit
-                            attendanceViewModel.submitAttendance(sessionId, studentId, name, base64)
-                        } catch (e: Exception) {
-                            Log.e("SelfieCapture", "conversion error: ${e.message}")
+                    imageCapture.takePicture(outputOptions, ContextCompat.getMainExecutor(context), object : ImageCapture.OnImageSavedCallback {
+                        override fun onError(exc: ImageCaptureException) {
+                            Log.e("SelfieCapture", "Photo capture failed: ${exc.message}")
                             isCapturing = false
+                            attendanceViewModel.reset()
                         }
-                    }
-                })
 
-            }) {
-                Text("Ambil Selfie & Submit")
+                        override fun onImageSaved(output: ImageCapture.OutputFileResults) {
+                            // convert file to base64 with compression and submit
+                            try {
+                                // Read file to bitmap for compression
+                                val bitmap = BitmapFactory.decodeFile(photoFile.absolutePath)
+
+                                // Compress bitmap and convert to base64
+                                val compressed = compressBitmap(bitmap, maxSize = 1024)
+                                val out = ByteArrayOutputStream()
+                                compressed.compress(Bitmap.CompressFormat.JPEG, 70, out)
+                                val bytes = out.toByteArray()
+                                val base64 = "data:image/jpeg;base64," + Base64.encodeToString(bytes, Base64.NO_WRAP)
+
+                                Log.d("SelfieCapture", "Image compressed and encoded, size: ${bytes.size} bytes")
+
+                                // call viewmodel to submit
+                                attendanceViewModel.submitAttendance(sessionId, studentId, name, base64)
+                            } catch (e: Exception) {
+                                Log.e("SelfieCapture", "conversion error: ${e.message}")
+                                isCapturing = false
+                            }
+                        }
+                    })
+                },
+                modifier = Modifier
+                    .fillMaxWidth(0.85f)
+                    .height(56.dp)
+                    .padding(bottom = 16.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = primaryBlue),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text(
+                    "📸 Ambil Selfie & Submit",
+                    fontSize = 16.sp
+                )
             }
         }
 
@@ -144,7 +171,11 @@ fun SelfieCaptureScreen(navController: NavController, sessionId: String, attenda
                     isCapturing = false
                 }
                 // show inline error message
-                Text(text = "Error: ${ (state as AttendanceState.Error).message }", color = androidx.compose.material3.MaterialTheme.colorScheme.error)
+                Text(
+                    text = "Error: ${ (state as AttendanceState.Error).message }",
+                    color = androidx.compose.material3.MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
             }
             else -> {}
         }
@@ -213,14 +244,6 @@ private fun CameraPreviewForCapture(lifecycleOwner: androidx.lifecycle.Lifecycle
     }
 }
 
-fun readFileToBytes(file: File): ByteArray {
-    val size = file.length().toInt()
-    val bytes = ByteArray(size)
-    val fis = FileInputStream(file)
-    fis.use { it.read(bytes) }
-    return bytes
-}
-
 fun compressBitmap(bitmap: Bitmap, maxSize: Int = 1024): Bitmap {
     // Calculate ratio to scale down if needed
     val ratio = maxSize.toFloat() / Math.max(bitmap.width, bitmap.height)
@@ -233,11 +256,3 @@ fun compressBitmap(bitmap: Bitmap, maxSize: Int = 1024): Bitmap {
     }
 }
 
-suspend fun bitmapToBase64(bitmap: Bitmap, quality: Int = 70): String = withContext(Dispatchers.IO) {
-    // Compress bitmap first
-    val compressed = compressBitmap(bitmap, maxSize = 1024)
-    val out = ByteArrayOutputStream()
-    compressed.compress(Bitmap.CompressFormat.JPEG, quality, out)
-    val bytes = out.toByteArray()
-    "data:image/jpeg;base64," + Base64.encodeToString(bytes, Base64.NO_WRAP)
-}

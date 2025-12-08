@@ -13,28 +13,52 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
+import androidx.compose.animation.*
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.window.Dialog
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
 import androidx.camera.core.ExperimentalGetImage
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.common.InputImage
+import com.rakha.hadirapp.R
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+
+val RobotoMediumFamily = FontFamily(
+    Font(R.font.roboto_medium, FontWeight.Medium)
+)
 
 @SuppressLint("UnsafeOptInUsageError", "NewApi")
 @Composable
@@ -219,3 +243,124 @@ private fun CameraPreviewForScanner(lifecycleOwner: androidx.lifecycle.Lifecycle
 
     }, modifier = Modifier.fillMaxSize())
 }
+
+@Composable
+fun AttendanceClosedAlert(
+    onDismiss: () -> Unit,
+    message: String = "Absensi masih ditutup"
+) {
+    val primaryBlue = Color(0xFF0C5AFF)
+
+    // Animation states
+    var visible by remember { mutableStateOf(false) }
+    val scale by animateFloatAsState(
+        targetValue = if (visible) 1f else 0.5f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        ),
+        label = "scale"
+    )
+
+    val alpha by animateFloatAsState(
+        targetValue = if (visible) 1f else 0f,
+        animationSpec = tween(durationMillis = 300),
+        label = "alpha"
+    )
+
+    // Icon pulse animation
+    val infiniteTransition = rememberInfiniteTransition(label = "pulse")
+    val iconScale by infiniteTransition.animateFloat(
+        initialValue = 1f,
+        targetValue = 1.15f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(800, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "iconPulse"
+    )
+
+    LaunchedEffect(Unit) {
+        visible = true
+    }
+
+    Dialog(onDismissRequest = onDismiss) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .scale(scale)
+                .graphicsLayer(alpha = alpha),
+            shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(32.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(20.dp)
+            ) {
+                // Animated Icon
+                Box(
+                    modifier = Modifier
+                        .size(100.dp)
+                        .scale(iconScale)
+                        .background(
+                            color = Color.Red.copy(alpha = 0.1f),
+                            shape = RoundedCornerShape(50.dp)
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "Closed",
+                        modifier = Modifier.size(60.dp),
+                        tint = Color.Red
+                    )
+                }
+
+                // Title
+                Text(
+                    text = "Absensi Ditutup",
+                    fontSize = 24.sp,
+                    fontFamily = RobotoMediumFamily,
+                    fontWeight = FontWeight.Medium,
+                    color = Color.Black,
+                    textAlign = TextAlign.Center
+                )
+
+                // Message
+                Text(
+                    text = message,
+                    fontSize = 16.sp,
+                    fontFamily = RobotoMediumFamily,
+                    color = Color.Gray,
+                    textAlign = TextAlign.Center
+                )
+
+                // Dismiss Button
+                Button(
+                    onClick = {
+                        visible = false
+                        onDismiss()
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(52.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = primaryBlue),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text(
+                        text = "Tutup",
+                        fontSize = 16.sp,
+                        fontFamily = RobotoMediumFamily,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+            }
+        }
+    }
+}
+
+

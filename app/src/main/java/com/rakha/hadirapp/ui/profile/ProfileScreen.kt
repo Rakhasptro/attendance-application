@@ -1,13 +1,32 @@
 package com.rakha.hadirapp.ui.profile
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.rakha.hadirapp.R
+
+val RobotoMediumFamily = FontFamily(
+    Font(R.font.roboto_medium, FontWeight.Medium)
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -16,98 +35,317 @@ fun ProfileScreen(navController: NavController, viewModel: ProfileViewModel) {
     val profile by viewModel.profileData.collectAsStateWithLifecycle()
     val email by viewModel.email.collectAsStateWithLifecycle()
 
-    // Use simple String state for text fields and update when profile changes
-    var fullName by remember { mutableStateOf(profile?.fullName ?: "") }
-    var npm by remember { mutableStateOf(profile?.npm ?: "") }
+    var showEditDialog by remember { mutableStateOf(false) }
+    var editFullName by remember { mutableStateOf("") }
+    var editNpm by remember { mutableStateOf("") }
 
-    // Material3: use SnackbarHostState and provide it to Scaffold via snackbarHost
     val snackbarHostState = remember { SnackbarHostState() }
+    val primaryBlue = Color(0xFF0C5AFF)
 
-    // collect one-off events and show as snackbar
     LaunchedEffect(viewModel.eventFlow) {
         viewModel.eventFlow.collect { msg ->
             snackbarHostState.showSnackbar(msg)
         }
     }
 
-    // When profile is loaded/changed, update the editable fields
-    LaunchedEffect(profile) {
-        fullName = profile?.fullName ?: ""
-        npm = profile?.npm ?: ""
-    }
-
-    // Trigger initial load when screen composed (only once)
     LaunchedEffect(Unit) {
         viewModel.loadProfile()
     }
 
     val isLoading = uiState is ProfileUiState.Loading
-    val isChanged = fullName != (profile?.fullName ?: "") || npm != (profile?.npm ?: "")
 
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
             TopAppBar(
-                title = { Text(text = "Profile") },
+                title = {
+                    Text(
+                        text = "Profile",
+                        fontFamily = RobotoMediumFamily,
+                        fontWeight = FontWeight.Medium
+                    )
+                },
                 navigationIcon = {
-                    TextButton(onClick = { navController.popBackStack() }) {
-                        Text(text = "Back")
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back",
+                            tint = primaryBlue
+                        )
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.White
+                )
             )
         }
     ) { padding ->
-        Box(modifier = Modifier
-            .fillMaxSize()
-            .padding(padding), contentAlignment = Alignment.TopCenter) {
-            Column(modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color(0xFFF5F5F5))
+                .padding(padding)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(20.dp)
+            ) {
+                Spacer(modifier = Modifier.height(20.dp))
 
-                OutlinedTextField(
-                    value = email ?: "",
-                    onValueChange = {},
-                    label = { Text("Email") },
-                    enabled = false,
-                    modifier = Modifier.fillMaxWidth()
+                // Profile Avatar
+                Box(
+                    modifier = Modifier
+                        .size(120.dp)
+                        .clip(CircleShape)
+                        .background(primaryBlue.copy(alpha = 0.1f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Person,
+                        contentDescription = "Profile",
+                        modifier = Modifier.size(60.dp),
+                        tint = primaryBlue
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Profile Info Card
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(24.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        // Email (Read-only)
+                        ProfileInfoItem(
+                            label = "Email",
+                            value = email ?: "-",
+                            isLoading = isLoading
+                        )
+
+                        HorizontalDivider(color = Color.LightGray.copy(alpha = 0.3f))
+
+                        // Full Name
+                        ProfileInfoItem(
+                            label = "Full Name",
+                            value = profile?.fullName ?: "-",
+                            isLoading = isLoading
+                        )
+
+                        HorizontalDivider(color = Color.LightGray.copy(alpha = 0.3f))
+
+                        // NPM
+                        ProfileInfoItem(
+                            label = "NPM",
+                            value = profile?.npm ?: "-",
+                            isLoading = isLoading
+                        )
+                    }
+                }
+
+                // Edit Button
+                Button(
+                    onClick = {
+                        editFullName = profile?.fullName ?: ""
+                        editNpm = profile?.npm ?: ""
+                        showEditDialog = true
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = primaryBlue),
+                    shape = RoundedCornerShape(12.dp),
+                    enabled = !isLoading
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = "Edit",
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Edit Profile",
+                        fontSize = 16.sp,
+                        fontFamily = RobotoMediumFamily,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+
+                // Loading or Error State
+                when (uiState) {
+                    is ProfileUiState.Loading -> {
+                        CircularProgressIndicator(color = primaryBlue)
+                    }
+                    is ProfileUiState.Error -> {
+                        val msg = (uiState as ProfileUiState.Error).message
+                        Text(
+                            text = "Error: $msg",
+                            color = Color.Red,
+                            fontFamily = RobotoMediumFamily
+                        )
+                    }
+                    else -> {}
+                }
+            }
+        }
+
+        // Edit Dialog
+        if (showEditDialog) {
+            EditProfileDialog(
+                fullName = editFullName,
+                npm = editNpm,
+                onFullNameChange = { editFullName = it },
+                onNpmChange = { editNpm = it },
+                onDismiss = { showEditDialog = false },
+                onConfirm = {
+                    viewModel.saveProfile(editFullName, editNpm, email ?: "")
+                    showEditDialog = false
+                },
+                isLoading = isLoading,
+                primaryBlue = primaryBlue
+            )
+        }
+    }
+}
+
+@Composable
+fun ProfileInfoItem(label: String, value: String, isLoading: Boolean) {
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Text(
+            text = label,
+            fontSize = 12.sp,
+            fontFamily = RobotoMediumFamily,
+            color = Color.Gray
+        )
+        if (isLoading) {
+            Text(
+                text = "Loading...",
+                fontSize = 16.sp,
+                fontFamily = RobotoMediumFamily,
+                color = Color.Black
+            )
+        } else {
+            Text(
+                text = value,
+                fontSize = 16.sp,
+                fontFamily = RobotoMediumFamily,
+                fontWeight = FontWeight.Medium,
+                color = Color.Black
+            )
+        }
+    }
+}
+
+@Composable
+fun EditProfileDialog(
+    fullName: String,
+    npm: String,
+    onFullNameChange: (String) -> Unit,
+    onNpmChange: (String) -> Unit,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit,
+    isLoading: Boolean,
+    primaryBlue: Color
+) {
+    Dialog(onDismissRequest = { if (!isLoading) onDismiss() }) {
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Text(
+                    text = "Edit Profile",
+                    fontSize = 20.sp,
+                    fontFamily = RobotoMediumFamily,
+                    fontWeight = FontWeight.Medium,
+                    color = Color.Black
                 )
 
                 OutlinedTextField(
                     value = fullName,
-                    onValueChange = { fullName = it },
-                    label = { Text("Full Name") },
-                    modifier = Modifier.fillMaxWidth()
+                    onValueChange = onFullNameChange,
+                    label = { Text("Full Name", fontFamily = RobotoMediumFamily) },
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = !isLoading,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = primaryBlue,
+                        focusedLabelColor = primaryBlue
+                    ),
+                    shape = RoundedCornerShape(12.dp)
                 )
 
                 OutlinedTextField(
                     value = npm,
-                    onValueChange = { npm = it },
-                    label = { Text("NPM") },
-                    modifier = Modifier.fillMaxWidth()
+                    onValueChange = onNpmChange,
+                    label = { Text("NPM", fontFamily = RobotoMediumFamily) },
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = !isLoading,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = primaryBlue,
+                        focusedLabelColor = primaryBlue
+                    ),
+                    shape = RoundedCornerShape(12.dp)
                 )
 
-                Button(onClick = {
-                    viewModel.saveProfile(fullName, npm, email ?: "")
-                }, modifier = Modifier.align(Alignment.End), enabled = !isLoading && isChanged) {
-                    Text(text = if (isLoading) "Saving..." else "Save")
-                }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    OutlinedButton(
+                        onClick = onDismiss,
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(48.dp),
+                        enabled = !isLoading,
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = primaryBlue
+                        )
+                    ) {
+                        Text(
+                            text = "Cancel",
+                            fontFamily = RobotoMediumFamily
+                        )
+                    }
 
-                when (uiState) {
-                    is ProfileUiState.Loading -> {
-                        // show a subtle loading indicator when repository calls are in progress
-                        CircularProgressIndicator()
-                    }
-                    is ProfileUiState.Error -> {
-                        val msg = (uiState as ProfileUiState.Error).message
-                        Text(text = "Error: $msg", color = MaterialTheme.colorScheme.error)
-                    }
-                    is ProfileUiState.Success -> {
-                        val msg = (uiState as ProfileUiState.Success).message
-                        if (!msg.isNullOrBlank()) {
-                            Text(text = msg, color = MaterialTheme.colorScheme.primary)
+                    Button(
+                        onClick = onConfirm,
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(48.dp),
+                        enabled = !isLoading && fullName.isNotBlank() && npm.isNotBlank(),
+                        colors = ButtonDefaults.buttonColors(containerColor = primaryBlue),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        if (isLoading) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(20.dp),
+                                color = Color.White,
+                                strokeWidth = 2.dp
+                            )
+                        } else {
+                            Text(
+                                text = "Confirm",
+                                fontFamily = RobotoMediumFamily
+                            )
                         }
                     }
-                    else -> {}
                 }
             }
         }
