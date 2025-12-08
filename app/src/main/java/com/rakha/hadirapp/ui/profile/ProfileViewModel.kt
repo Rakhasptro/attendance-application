@@ -98,4 +98,19 @@ class ProfileViewModel(
             }
         }
     }
+
+    fun logout() {
+        viewModelScope.launch {
+            try {
+                tokenDataStore.clearToken()
+                TokenHolder.setToken(null)
+                _profileData.value = null
+                _email.value = null
+                _uiState.value = ProfileUiState.Idle
+                Log.d("ProfileViewModel", "User logged out successfully")
+            } catch (e: Exception) {
+                Log.e("ProfileViewModel", "Error during logout: ${e.message}")
+            }
+        }
+    }
 }

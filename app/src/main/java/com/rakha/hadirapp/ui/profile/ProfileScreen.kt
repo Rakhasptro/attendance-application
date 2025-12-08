@@ -6,6 +6,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
@@ -36,6 +37,7 @@ fun ProfileScreen(navController: NavController, viewModel: ProfileViewModel) {
     val email by viewModel.email.collectAsStateWithLifecycle()
 
     var showEditDialog by remember { mutableStateOf(false) }
+    var showLogoutDialog by remember { mutableStateOf(false) }
     var editFullName by remember { mutableStateOf("") }
     var editNpm by remember { mutableStateOf("") }
 
@@ -181,6 +183,34 @@ fun ProfileScreen(navController: NavController, viewModel: ProfileViewModel) {
                     )
                 }
 
+                // Logout Button
+                OutlinedButton(
+                    onClick = {
+                        showLogoutDialog = true
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = Color.Red
+                    ),
+                    shape = RoundedCornerShape(12.dp),
+                    enabled = !isLoading
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ExitToApp,
+                        contentDescription = "Logout",
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Logout",
+                        fontSize = 16.sp,
+                        fontFamily = RobotoMediumFamily,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+
                 // Loading or Error State
                 when (uiState) {
                     is ProfileUiState.Loading -> {
@@ -212,6 +242,21 @@ fun ProfileScreen(navController: NavController, viewModel: ProfileViewModel) {
                     showEditDialog = false
                 },
                 isLoading = isLoading,
+                primaryBlue = primaryBlue
+            )
+        }
+
+        // Logout Confirmation Dialog
+        if (showLogoutDialog) {
+            LogoutConfirmationDialog(
+                onDismiss = { showLogoutDialog = false },
+                onConfirm = {
+                    showLogoutDialog = false
+                    viewModel.logout()
+                    navController.navigate("login") {
+                        popUpTo(0) { inclusive = true }
+                    }
+                },
                 primaryBlue = primaryBlue
             )
         }
@@ -351,3 +396,103 @@ fun EditProfileDialog(
         }
     }
 }
+
+@Composable
+fun LogoutConfirmationDialog(
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit,
+    primaryBlue: Color
+) {
+    Dialog(onDismissRequest = onDismiss) {
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(32.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(20.dp)
+            ) {
+                // Warning Icon
+                Box(
+                    modifier = Modifier
+                        .size(80.dp)
+                        .background(
+                            color = Color(0xFFFFC107).copy(alpha = 0.1f),
+                            shape = RoundedCornerShape(40.dp)
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ExitToApp,
+                        contentDescription = "Logout",
+                        modifier = Modifier.size(40.dp),
+                        tint = Color(0xFFFFC107)
+                    )
+                }
+
+                // Title
+                Text(
+                    text = "Konfirmasi Logout",
+                    fontSize = 22.sp,
+                    fontFamily = RobotoMediumFamily,
+                    fontWeight = FontWeight.Medium,
+                    color = Color.Black,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                )
+
+                // Message
+                Text(
+                    text = "Apakah Anda yakin ingin keluar?",
+                    fontSize = 16.sp,
+                    fontFamily = RobotoMediumFamily,
+                    color = Color.Gray,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                )
+
+                // Buttons
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    OutlinedButton(
+                        onClick = onDismiss,
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(50.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = primaryBlue
+                        )
+                    ) {
+                        Text(
+                            text = "Kembali",
+                            fontFamily = RobotoMediumFamily,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+
+                    Button(
+                        onClick = onConfirm,
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(50.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Text(
+                            text = "Ya, Logout",
+                            fontFamily = RobotoMediumFamily,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+

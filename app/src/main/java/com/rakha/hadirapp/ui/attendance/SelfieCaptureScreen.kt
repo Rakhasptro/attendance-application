@@ -7,23 +7,32 @@ import android.util.Log
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
 import androidx.core.content.ContextCompat
+import com.rakha.hadirapp.R
 import java.io.ByteArrayOutputStream
 import java.io.File
 
@@ -33,6 +42,8 @@ fun SelfieCaptureScreen(navController: NavController, sessionId: String, attenda
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     var isCapturing by remember { mutableStateOf(false) }
+    var showErrorDialog by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf("") }
 
     val primaryBlue = Color(0xFF0C5AFF)
 
@@ -162,23 +173,33 @@ fun SelfieCaptureScreen(navController: NavController, sessionId: String, attenda
             is AttendanceState.Success -> {
                 LaunchedEffect(Unit) {
                     isCapturing = false
-                    navController.popBackStack()
+                    // Navigate to home instead of popBackStack
+                    navController.navigate("home") {
+                        popUpTo("home") { inclusive = true }
+                    }
                 }
             }
             is AttendanceState.Error -> {
                 val msg = (state as AttendanceState.Error).message
                 LaunchedEffect(msg) {
                     isCapturing = false
+                    errorMessage = msg
+                    showErrorDialog = true
                 }
-                // show inline error message
-                Text(
-                    text = "Error: ${ (state as AttendanceState.Error).message }",
-                    color = androidx.compose.material3.MaterialTheme.colorScheme.error,
-                    modifier = Modifier.padding(bottom = 16.dp)
-                )
             }
             else -> {}
         }
+    }
+
+    // Show error dialog
+    if (showErrorDialog) {
+        AttendanceNotOpenAlert(
+            onDismiss = {
+                showErrorDialog = false
+                attendanceViewModel.reset()
+            },
+            message = errorMessage
+        )
     }
 }
 
@@ -253,6 +274,122 @@ fun compressBitmap(bitmap: Bitmap, maxSize: Int = 1024): Bitmap {
         Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, true)
     } else {
         bitmap
+    }
+}
+
+@Composable
+fun AttendanceNotOpenAlert(
+    onDismiss: () -> Unit,
+    message: String
+) {
+    val primaryBlue = Color(0xFF0C5AFF)
+
+    // Animation states
+    var visible by remember { mutableStateOf(false) }
+    val scale by animateFloatAsState(
+        targetValue = if (visible) 1f else 0.5f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        ),
+        label = "scale"
+    )
+
+    val alpha by animateFloatAsState(
+        targetValue = if (visible) 1f else 0f,
+        animationSpec = tween(durationMillis = 300),
+        label = "alpha"
+    )
+
+    // Icon pulse animation
+    val infiniteTransition = rememberInfiniteTransition(label = "pulse")
+    val iconScale by infiniteTransition.animateFloat(
+        initialValue = 1f,
+        targetValue = 1.15f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(800, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "iconPulse"
+    )
+
+    LaunchedEffect(Unit) {
+        visible = true
+    }
+
+    Dialog(onDismissRequest = onDismiss) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .scale(scale)
+                .graphicsLayer(alpha = alpha),
+            shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(32.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(20.dp)
+            ) {
+                // Animated Icon
+                Box(
+                    modifier = Modifier
+                        .size(100.dp)
+                        .scale(iconScale)
+                        .background(
+                            color = Color(0xFFFF9800).copy(alpha = 0.1f),
+                            shape = RoundedCornerShape(50.dp)
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Info,
+                        contentDescription = "Info",
+                        modifier = Modifier.size(60.dp),
+                        tint = Color(0xFFFF9800)
+                    )
+                }
+
+                // Title
+                Text(
+                    text = "Absensi Belum Dibuka",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = Color.Black,
+                    textAlign = TextAlign.Center
+                )
+
+                // Message
+                Text(
+                    text = message.ifBlank { "Jadwal harus diaktifkan oleh dosen terlebih dahulu" },
+                    fontSize = 16.sp,
+                    color = Color.Gray,
+                    textAlign = TextAlign.Center
+                )
+
+                // Dismiss Button
+                Button(
+                    onClick = {
+                        visible = false
+                        onDismiss()
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(52.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = primaryBlue),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text(
+                        text = "Mengerti",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+            }
+        }
     }
 }
 

@@ -57,19 +57,13 @@ fun AppNavHost(startDestination: String = "welcome") {
     // Home ViewModel
     val homeViewModel = remember { HomeViewModel(attendanceRepo) }
 
-    // observe token and auto-navigate if present
+    // observe token for auto-login
     val token by store.getTokenFlow().collectAsState(initial = null)
 
     LaunchedEffect(token) {
-        Log.d("AppNavHost", "observed token change: $token")
+        Log.d("AppNavHost", "Token observed: ${if (token.isNullOrBlank()) "empty" else "present"}")
         // update in-memory token holder for interceptor
         com.rakha.hadirapp.data.store.TokenHolder.setToken(token)
-        if (!token.isNullOrBlank()) {
-            Log.d("AppNavHost", "navigating to home because token present")
-            navController.navigate("home") {
-                popUpTo("login") { inclusive = true }
-            }
-        }
     }
 
     NavHost(navController = navController, startDestination = startDestination) {

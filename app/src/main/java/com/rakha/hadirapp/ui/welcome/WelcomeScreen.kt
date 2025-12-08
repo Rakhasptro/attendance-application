@@ -9,14 +9,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.rakha.hadirapp.R
+import com.rakha.hadirapp.data.store.TokenDataStore
 import kotlinx.coroutines.delay
 
 @Composable
 fun WelcomeScreen(navController: NavController) {
+    val context = LocalContext.current
+    val tokenStore = remember { TokenDataStore(context) }
+    val token by tokenStore.getTokenFlow().collectAsState(initial = null)
+
     // Animation state
     var animationStarted by remember { mutableStateOf(false) }
 
@@ -45,9 +51,24 @@ fun WelcomeScreen(navController: NavController) {
     // Start animation and navigate after delay
     LaunchedEffect(Unit) {
         animationStarted = true
-        delay(4000) // 4 seconds
-        navController.navigate("login") {
-            popUpTo("welcome") { inclusive = true }
+        delay(3000) // 3 seconds animation
+    }
+
+    // Navigate after animation based on token
+    LaunchedEffect(token) {
+        if (animationStarted) {
+            delay(500) // Small delay for smooth transition
+            if (!token.isNullOrBlank()) {
+                // User is logged in, go to home
+                navController.navigate("home") {
+                    popUpTo("welcome") { inclusive = true }
+                }
+            } else {
+                // User not logged in, go to login
+                navController.navigate("login") {
+                    popUpTo("welcome") { inclusive = true }
+                }
+            }
         }
     }
 
