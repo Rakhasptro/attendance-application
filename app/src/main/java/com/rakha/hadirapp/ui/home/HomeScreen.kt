@@ -30,6 +30,7 @@ import coil.compose.AsyncImage
 import com.rakha.hadirapp.R
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import com.rakha.hadirapp.BuildConfig
 import com.rakha.hadirapp.data.network.dto.AttendanceHistoryItem
 import com.rakha.hadirapp.ui.profile.ProfileViewModel
 import java.text.SimpleDateFormat
@@ -229,7 +230,7 @@ fun HomeScreen(
                         modifier = Modifier.fillMaxSize()
                     ) {
                         items(filteredHistory) { item ->
-                            AttendanceHistoryCard(item = item, baseUrl = "http://10.0.2.2:3000")
+                            AttendanceHistoryCard(item = item)
                         }
                     }
                 }
@@ -245,13 +246,16 @@ val RobotoFamily = FontFamily(
 )
 
 @Composable
-fun AttendanceHistoryCard(item: AttendanceHistoryItem, baseUrl: String) {
+fun AttendanceHistoryCard(item: AttendanceHistoryItem) {
     val primaryBlue = Color(0xFF0C5AFF)
     val statusColor = when (item.status?.uppercase()) {
         "CONFIRMED" -> primaryBlue
         "REJECTED" -> Color.Red
         else -> Color.Gray
     }
+
+    // Get base URL without /api/ suffix for images
+    val baseUrl = BuildConfig.BASE_URL.removeSuffix("/api/").removeSuffix("/api")
 
     Card(
         modifier = Modifier.fillMaxWidth(),
