@@ -28,6 +28,8 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.rakha.hadirapp.R
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import com.rakha.hadirapp.data.network.dto.AttendanceHistoryItem
 import com.rakha.hadirapp.ui.profile.ProfileViewModel
 import java.text.SimpleDateFormat
@@ -53,6 +55,16 @@ fun HomeScreen(
     }
 
     val primaryBlue = Color(0xFF0C5AFF)
+    val MarcellusFamily= FontFamily(
+        Font(R.font.marcellus, FontWeight.Normal),
+    )
+    val RobotoFamily= FontFamily(
+        Font(R.font.roboto_mono_thin, FontWeight.W100),
+        Font(R.font.roboto_slab_medium, FontWeight.W200),
+        Font(R.font.roboto_slab_extrabold, FontWeight.W300),
+        Font(R.font.roboto_medium, FontWeight.W400)
+    )
+
 
     Box(
         modifier = Modifier
@@ -75,12 +87,14 @@ fun HomeScreen(
                         text = "Hi, ${profileData?.fullName ?: "User"}",
                         fontSize = 28.sp,
                         fontWeight = FontWeight.Bold,
+                        fontFamily = MarcellusFamily,
                         color = Color.Black
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = getCurrentDateString(),
                         fontSize = 14.sp,
+                        fontFamily = RobotoFamily,
                         color = Color.Gray
                     )
                 }
@@ -135,14 +149,17 @@ fun HomeScreen(
                     Column {
                         Text(
                             text = "Scan qr code",
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold,
+                            fontSize = 30.sp,
+                            fontFamily = RobotoFamily,
+                            fontWeight = FontWeight.W300,
                             color = Color.White
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = "Pastikan Absensi sudah aktif !!",
                             fontSize = 14.sp,
+                            fontFamily = RobotoFamily,
+                            fontWeight = FontWeight.W200,
                             color = Color.White.copy(alpha = 0.9f)
                         )
                     }
@@ -153,9 +170,10 @@ fun HomeScreen(
 
             // History Section Header
             Text(
-                text = "history",
+                text = "History",
                 fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
+                fontFamily = RobotoFamily,
+                fontWeight = FontWeight.W400,
                 color = Color.Black
             )
 
@@ -220,6 +238,12 @@ fun HomeScreen(
     }
 }
 
+val RobotoFamily = FontFamily(
+    Font(R.font.roboto_mono_thin, FontWeight.W100),
+    Font(R.font.roboto_slab_medium, FontWeight.W200),
+    Font(R.font.roboto_slab_extrabold, FontWeight.W300),
+)
+
 @Composable
 fun AttendanceHistoryCard(item: AttendanceHistoryItem, baseUrl: String) {
     val primaryBlue = Color(0xFF0C5AFF)
@@ -273,6 +297,8 @@ fun AttendanceHistoryCard(item: AttendanceHistoryItem, baseUrl: String) {
                 Text(
                     text = formatScannedDate(item.scannedAt),
                     fontSize = 13.sp,
+                    fontFamily = RobotoFamily,
+                    fontWeight = FontWeight.W200,
                     color = Color.Gray
                 )
             }
