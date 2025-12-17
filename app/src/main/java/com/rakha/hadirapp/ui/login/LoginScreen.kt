@@ -19,6 +19,9 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.draw.alpha
 import com.rakha.hadirapp.R
 import com.rakha.hadirapp.ui.theme.PrimaryBlue
@@ -78,22 +81,23 @@ fun LoginScreen(
         }
     }
 
-    Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) }
-    ) { inner ->
-        Box(
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .imePadding()
+    ) {
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(inner)
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 32.dp)
+                .alpha(fadeAlpha),
+            horizontalAlignment = Alignment.CenterHorizontally,
+
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 32.dp)
-                    .alpha(fadeAlpha),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
+
+            Spacer(modifier = Modifier.weight(1f))
+
                 // Logo
                 AnimatedVisibility(
                     visible = true,
@@ -103,7 +107,8 @@ fun LoginScreen(
                         painter = painterResource(id = R.drawable.logo_transparan),
                         contentDescription = "Logo",
                         modifier = Modifier
-                            .size(300.dp)
+                            .fillMaxWidth(0.6f)
+                            .aspectRatio(1f)
                             .padding(bottom = 15.dp)
                     )
                 }
@@ -261,7 +266,16 @@ fun LoginScreen(
                         }
                     }
                 }
-            }
+
+            Spacer(modifier = Modifier.weight(1f))
         }
+
+        // Snackbar host at bottom
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(16.dp)
+        )
     }
 }
