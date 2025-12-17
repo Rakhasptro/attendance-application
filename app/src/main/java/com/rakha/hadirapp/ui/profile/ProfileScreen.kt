@@ -84,18 +84,21 @@ fun ProfileScreen(navController: NavController, viewModel: ProfileViewModel) {
                 )
             )
         }
-    ) { padding ->
+    ) {innerPadding ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
+                .padding(innerPadding)
                 .background(Color(0xFFF5F5F5))
-                .padding(padding)
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .verticalScroll(rememberScrollState())
-                    .padding(24.dp),
+                    .padding(
+                        horizontal = 24.dp,
+                        vertical = 12.dp
+                    ),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
