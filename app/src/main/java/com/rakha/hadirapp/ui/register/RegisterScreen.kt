@@ -4,6 +4,9 @@ import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -75,10 +78,11 @@ fun RegisterScreen(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
                     .padding(horizontal = 32.dp)
                     .alpha(fadeAlpha),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
+                verticalArrangement = Arrangement.Top
             ) {
 
                 // Logo
@@ -90,8 +94,8 @@ fun RegisterScreen(
                         painter = painterResource(id = R.mipmap.logo_transparan),
                         contentDescription = "Logo",
                         modifier = Modifier
-                            .size(300.dp)
-                            .padding(bottom = 15.dp)
+                            .fillMaxWidth(0.6f) // ✅ adaptif
+                            .aspectRatio(1f)   // ✅ jaga proporsi
                     )
                 }
 
@@ -205,7 +209,7 @@ fun RegisterScreen(
                         onClick = { viewModel.register(email.trim(), password, confirmPassword) },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(50.dp),
+                            .heightIn(min = 48.dp),
                         shape = MaterialTheme.shapes.medium,
                         enabled = uiState !is RegisterUiState.Loading,
                         colors = ButtonDefaults.buttonColors(
