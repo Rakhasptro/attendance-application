@@ -5,8 +5,6 @@ import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -21,6 +19,8 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.ui.draw.alpha
 import com.rakha.hadirapp.R
 import com.rakha.hadirapp.ui.theme.PrimaryBlue
@@ -78,35 +78,14 @@ fun ForgotPasswordScreen(
             }
         }
     }
-
-    Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) },
-        topBar = {
-            TopAppBar(
-                title = { },
-                navigationIcon = {
-                    IconButton(onClick = { navController.navigateUp() }) {
-                        Icon(
-                            imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Back",
-                            tint = Color(0xFF1F2937)
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.White
-                )
-            )
-        }
-    ) { inner ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(inner)
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
                     .padding(horizontal = 32.dp)
                     .alpha(fadeAlpha),
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -293,5 +272,4 @@ fun ForgotPasswordScreen(
             }
         }
     }
-}
 

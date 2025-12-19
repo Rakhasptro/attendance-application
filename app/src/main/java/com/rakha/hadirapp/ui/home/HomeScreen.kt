@@ -48,7 +48,7 @@ fun HomeScreen(
     val searchQuery by homeViewModel.searchQuery.collectAsState()
 
     // Load profile and history when entering home screen
-    LaunchedEffect(Unit) {
+    LaunchedEffect(true) {
         if (profileData == null) {
             profileViewModel.loadProfile()
         }
@@ -75,7 +75,7 @@ fun HomeScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(24.dp)
+                .padding(horizontal = 20.dp, vertical = 16.dp)
         ) {
             // Header with greeting and profile icon
             Row(
@@ -227,7 +227,9 @@ fun HomeScreen(
                 else -> {
                     LazyColumn(
                         verticalArrangement = Arrangement.spacedBy(12.dp),
-                        modifier = Modifier.fillMaxSize()
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f)
                     ) {
                         items(filteredHistory) { item ->
                             AttendanceHistoryCard(item = item)
